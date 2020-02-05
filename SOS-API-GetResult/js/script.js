@@ -1,4 +1,12 @@
-// Write JavaScript here 
+/*****************************************************************************
+
+  web上からjavascriptを使ってSOS API(GetResult)を発行してその結果を受け取る例
+
+
+*****************************************************************************/
+/* */
+
+// ボタンのオブジェクトを取得・初期化
 var response = document.getElementById("res");
 response.innerHTML='応答';
 var reset = document.getElementById("rest-button");
@@ -6,6 +14,7 @@ reset.onclick = function(){
   response.innerHTML='応答'
 };
 
+/* SOS API GetResultを作る元となるtextデータ 開始時刻%START%，終了時刻%END%を次のtableで指定する */
 var GetResult =`{
   "request": "GetResult",
   "service": "SOS",
@@ -26,35 +35,46 @@ var GetResult =`{
   ]
 }`;
 
+/*  Getresultのデータ取得時刻の範囲を指定  */
 var table = {
   START:"2020-02-04T16:00:00+09:00",
   END:  "2020-02-04T16:10:00+09:00"
 };
 
-var getresult = ReplaceStrings_text(GetResult);
-console.log(getresult.replace_table(table));
+var getresult = new ReplaceStrings_text(GetResult); //クラスのインスタンス
 
-var getresult = JSON.parse(GetResult);
-  
+
+/* jQueryを使ったajax通信の例　クリックしたら通信開始 */
 $( function() {
     $('#ajax-button').click(
-    function() {
-       var hostUrl= 'https://httpbin.org/post';
-//        var hostUrl = 'http://eeciot.tsuruoka-nct.ac.jp:8080/52nSOS/service';
-        var param1 = 1;
-        var param2 = 10;
+      function() {
+//        var hostUrl= 'https://httpbin.org/post';  //POST内容の確認用webサイト
+        var hostUrl = 'http://eeciot.tsuruoka-nct.ac.jp:8080/52nSOS/service';　//SOSサーバURL
+        var post_body = getresult.replace_table(table); //POST用データ(body)の文字列
+        console.log("POST BODY:\n"+post_body);
+
         $.ajax({
             url: hostUrl,
-            type:'POST',
-            dataType: 'json',
-//            data : {parameter1 : param1, parameter2 : param2 },
-          data : getresult,
+            contentType: "application/json;charset=UTF-8",
+            type: 'POST',
+            processData:false,    //ここが重要：デフォルトでtureはdataに指定したオブジェクトを
+                                  //クエリ文字列に変換に変換する．falseでdataの内容をそのまま送信
+            data : post_body,
             timeout:3000,
-        }).done(function(data) {
-          response.innerHTML='<pre>'+JSON.stringify(data,null,'    ')+'</pre>';
-          alert("ok");
-        }).fail(function(XMLHttpRequest, textStatus, errorThrown) {
-           alert("error");
+
+        }).done(function(data) { //通信成功
+          response.innerHTML='開始時刻: '+table.START+"<br>";
+          response.innerHTML+='終了時刻: '+table.END+"<br>";
+          response.innerHTML+='SOS応答(BODY部):<br>';
+          response.innerHTML+='<pre>'+JSON.stringify(data,null,'    ')+'</pre>';
+//          alert("ok");
+
+        }).fail(function(XMLHttpRequest, textStatus, errorThrown) { //通信失敗
+           console.log("Status: "+textStatus);
+           console.log("XML:\n"+XMLHttpRequest.response);
+           console.log("errorThrown:\n"+errorThrown);
+//           alert("error");
         })
-    });
-} );
+        }
+    );
+});

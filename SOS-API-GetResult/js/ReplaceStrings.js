@@ -23,7 +23,7 @@
 
 */
 /* 変換用テーブル */
-function ReplaceStrings_table(table){
+function ReplaceStrings_table(table){   //クラスの宣言
     this.index = table;
 };
 
@@ -40,7 +40,7 @@ ReplaceStrings_table.prototype.replace_text = function(text){
     return text;
 }
 
-function ReplaceStrings_text(text){
+function ReplaceStrings_text(text){   //クラスの宣言
     this.text = text;   //変換元になるデータ（TEXT形式）を保存する。
 };
 ReplaceStrings_text.prototype.replace_table = function(table){
@@ -55,7 +55,9 @@ ReplaceStrings_text.prototype.replace_table = function(table){
     }
     return txt;
 }
-/* Webでは不使用　以下はnodeで利用する
+
+/* Webでは不使用　以下はnodeで利用する　*/
+/*
 module.exports = {
     replaceStrings_table : ReplaceStrings_table,
     replaceStrings_text  : ReplaceStrings_text
